@@ -6,7 +6,7 @@ local BaseURL = "https://raw.githubusercontent.com/FahriSetiawan69/SD/main/"
 if CoreGui:FindFirstChild("FR_SD_MobileToggle") then CoreGui.FR_SD_MobileToggle:Destroy() end
 if CoreGui:FindFirstChild("Fluent") then CoreGui.Fluent:Destroy() end
 
--- Load UI Library
+-- Load UI Library (Fluent)
 _G.Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 -- 2. WINDOW SETUP
@@ -14,7 +14,7 @@ local Window = _G.Fluent:CreateWindow({
     Title = "FahriRoundopHUB",
     SubTitle = "Sniper Duels Edition",
     TabWidth = 160, 
-    Size = UDim2.fromOffset(450, 320),
+    Size = UDim2.fromOffset(450, 360), -- Ukuran sedikit lebih tinggi untuk Slider
     Acrylic = true, 
     Theme = "Dark", 
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -46,26 +46,36 @@ local Tabs = {
 
 -- 5. FEATURES IMPLEMENTATION (Modular)
 
--- --- TOGGLE: ESP ---
+-- --- SECTION: VISUAL ---
+Tabs.Main:AddParagraph({
+    Title = "Visuals",
+    Content = "Enemy: Merah | Team: Hijau"
+})
+
 Tabs.Main:AddToggle("SD_ESP", {
     Title = "Player ESP", 
     Default = false,
-    Description = "Enemy: Merah | Team: Hijau (Subtle Outline)"
+    Description = "Melihat musuh menembus dinding."
 }):OnChanged(function(v)
     _G.ESP_Enabled = v
     if v and not _G.ESP_Loaded then
-        local success, err = pcall(function()
+        pcall(function()
             loadstring(game:HttpGet(BaseURL .. "Features/ESP.lua"))()
+            _G.ESP_Loaded = true
         end)
-        if success then _G.ESP_Loaded = true else warn("ESP Error: " .. err) end
     end
 end)
 
--- --- TOGGLE: AIM BOT ---
+-- --- SECTION: COMBAT ---
+Tabs.Main:AddParagraph({
+    Title = "Combat",
+    Content = "Fitur otomatis untuk memenangkan duel."
+})
+
 Tabs.Main:AddToggle("SD_AimBot", {
-    Title = "Silent Aim / Aim Bot", 
+    Title = "Auto-Lock Aimbot", 
     Default = false,
-    Description = "Otomatis Lock Target ke musuh terdekat."
+    Description = "Otomatis lock target (Tanpa Scope)."
 }):OnChanged(function(v)
     _G.Aimbot_Enabled = v
     if v and not _G.Aimbot_Loaded then
@@ -76,11 +86,23 @@ Tabs.Main:AddToggle("SD_AimBot", {
     end
 end)
 
--- --- TOGGLE: AUTO RELOAD ---
+-- --- SLIDER: ADJUST FOV ---
+Tabs.Main:AddSlider("SD_FOV_Slider", {
+    Title = "Aimbot FOV Size",
+    Description = "Atur lebar lingkaran target Aimbot.",
+    Default = 150,
+    Min = 50,
+    Max = 800,
+    Rounding = 0,
+    Callback = function(Value)
+        _G.Aimbot_FOV = Value
+    end
+})
+
 Tabs.Main:AddToggle("SD_AutoReload", {
     Title = "Auto Reload", 
     Default = false,
-    Description = "Isi peluru otomatis tanpa delay manual."
+    Description = "Otomatis isi peluru."
 }):OnChanged(function(v)
     _G.AutoReload_Enabled = v
     if v and not _G.AutoReload_Loaded then
@@ -91,11 +113,10 @@ Tabs.Main:AddToggle("SD_AutoReload", {
     end
 end)
 
--- --- TOGGLE: AUTO RUN ---
 Tabs.Main:AddToggle("SD_AutoRun", {
     Title = "Auto Run / Speed", 
     Default = false,
-    Description = "Lari lebih cepat secara konstan."
+    Description = "Lari lebih cepat secara otomatis."
 }):OnChanged(function(v)
     _G.AutoRun_Enabled = v
     if v and not _G.AutoRun_Loaded then
@@ -110,16 +131,18 @@ end)
 CoreGui.ChildRemoved:Connect(function(child)
     if child.Name == "Fluent" then
         ScreenGui:Destroy()
+        -- Reset all states
         _G.ESP_Enabled = false
         _G.Aimbot_Enabled = false
         _G.AutoReload_Enabled = false
         _G.AutoRun_Enabled = false
+        _G.Fluent = nil
     end
 end)
 
 _G.Fluent:Notify({
     Title = "FahriRoundopHUB",
-    Content = "Sniper Duels Hub Ready!",
+    Content = "Sniper Duels Edition Loaded!",
     Duration = 5
 })
 
